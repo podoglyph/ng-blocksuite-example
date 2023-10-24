@@ -2,7 +2,7 @@
 
 Demo of Blocksuite with Angular 16.
 
-## Create a new blocksuite workspace and page
+## Create a new blocksuite workspace and page (is this the way to create a new doc to be saved in the database)
 ```
 createNewWorkspace() {
 
@@ -13,7 +13,7 @@ createNewWorkspace() {
     page.waitForLoaded().then(() => {
       const pageBlockId = page.addBlock('affine:page');
       const noteId = page.addBlock('affine:note', {}, pageBlockId);
-      page.addBlock('affine:paragraph', {title: new Text("hello")}, noteId);
+      page.addBlock('affine:paragraph', {title: new Text("hello world")}, noteId);
     });
 
     const { doc } = workspace;
@@ -25,4 +25,12 @@ createNewWorkspace() {
       }
     });
   }
+  ```
+
+  ## Also, how to load an existing page from the database?
+  ```
+  const workspace = new Workspace({ id: 'foo', schema });
+  const data = getBinaryFromDB();
+
+  <!-- now what? -->
   ```

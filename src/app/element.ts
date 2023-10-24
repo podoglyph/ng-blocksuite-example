@@ -22,7 +22,7 @@ export class CustomAffineEditor extends LitElement {
         this.page?.waitForLoaded().then(() => {
             const pageBlockId = this.page?.addBlock('affine:page');
             const noteId = this.page?.addBlock('affine:note', {}, pageBlockId);
-            this.page?.addBlock('affine:paragraph', {}, noteId);
+            this.page?.addBlock('affine:paragraph', {text: new Text("hello world")}, noteId);
         });
     }
 
