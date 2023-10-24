@@ -17,20 +17,26 @@ createNewWorkspace() {
     });
 
     const { doc } = workspace;
+    const encodedDoc = Y.encodeStateAsUpdate(doc);
 
-    this.newDocGQL.mutate({ content: JSON.stringify(Y.encodeStateAsUpdate(doc)) }).pipe(take(1)).subscribe(data => {
-      if (data.data?.newDocument.id) {
-        const id = data.data?.newDocument.id;
-        this.router.navigate(['/doc', id]);
-      }
-    });
+    // save the binary to the database
+    saveBinaryToDB(JSON.stringify(encodedDoc))
+
   }
   ```
 
-  ## Also, how to load an existing page from the database?
+  ## How to load an existing page from the database?
   ```
   const workspace = new Workspace({ id: 'foo', schema });
+  
   const data = getBinaryFromDB();
+  const jsonObject = JSON.parse(data);
+  const numberArray = Object.keys(jsonObject).map(key => jsonObject[key]);
+  const encodedDoc = new Uint8Array(numberArray);
+
+  const ydoc = new Y.Doc();
+
+  Y.applyUpdate(this.workspace.doc, encodedDoc);
 
   <!-- now what? -->
   ```
