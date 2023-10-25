@@ -3,10 +3,14 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { NewDocComponent } from './components/new-doc/new-doc.component';
+import { WorkspaceComponent } from './pages/workspace/workspace.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    NewDocComponent,
+    WorkspaceComponent
   ],
   imports: [
     BrowserModule,
