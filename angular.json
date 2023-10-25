@@ -30,8 +30,8 @@
               }
             ],
             "styles": [
-              "node_modules/@blocksuite/editor/themes/affine.css",
-              "src/styles.css"
+              "src/styles.css",
+              "node_modules/@blocksuite/editor/themes/affine.css"
             ],
             "scripts": [ "node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"]
           },
