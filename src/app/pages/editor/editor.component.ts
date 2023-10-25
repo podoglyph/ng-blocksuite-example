@@ -42,7 +42,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.page = this.workspace.getPage("test-id") || null
       if (this.page) {
-        this.createEditor(this.page);
+        // this.createEditor(this.page);
         console.log(this.page);
       }
     } else {
@@ -60,38 +60,33 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     const wsProvider = new WebsocketProvider('ws://localhost:1234', 'my-roomname', this.workspace.doc)
     wsProvider.on('status', (event: { status: any; }) => {
       console.log(event.status) // logs "connected" or "disconnected"
-      setTimeout(() => {
-        if (event.status == "connected" && this.page && this.container) {
-          this.createEditor(this.page);
-        }
-      }, 1000);
     })
   }
 
   ngOnInit(): void {
-    // if (this.page) {
-    //   console.log("create edtior")
-    //   this.editor = new EditorContainer();
-    //   this.editor.page = this.page;
-    // }
-  }
-
-  ngAfterViewInit(): void {
-    if (this.editor && this.page) {
-      // console.log("render editor");
-      // this.renderer.appendChild(this.container.nativeElement, this.editor);
-      // this.monitorChanges();
+    if (this.page) {
+      console.log("create edtior")
+      this.editor = new EditorContainer();
+      this.editor.page = this.page;
     }
   }
 
-  createEditor(page: Page): void {
-    console.log("manual create")
-    this.editor = new EditorContainer();
-    this.editor.page = page;
-    console.log("render editor");
-    this.renderer.appendChild(this.container.nativeElement, this.editor);
-    this.monitorChanges();
+  ngAfterViewInit(): void {
+    if (this.editor && this.page && this.container) {
+      console.log("render editor");
+      this.renderer.appendChild(this.container.nativeElement, this.editor);
+      this.monitorChanges();
+    }
   }
+
+  // createEditor(page: Page): void {
+  //   console.log("manual create")
+  //   this.editor = new EditorContainer();
+  //   this.editor.page = page;
+  //   console.log("render editor");
+  //   this.renderer.appendChild(this.container.nativeElement, this.editor);
+  //   this.monitorChanges();
+  // }
 
   monitorChanges(): void {
     this.workspace.doc.on('update', (updates: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
