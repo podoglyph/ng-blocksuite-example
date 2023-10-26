@@ -12,14 +12,14 @@ schema.register(AffineSchemas);
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
-  styleUrls: ['./editor.component.css']
+  styleUrls: ['./editor.component.css'],
 })
 export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
 
   workspace: Workspace;
-  page: Page | null;
+  page!: Page | null;
   editor!: EditorContainer;
-  @ViewChild('container', { read: ElementRef, static: false })
+  @ViewChild('container', { read: ElementRef, static: true })
   container!: ElementRef;
   ydoc!: Y.Doc;
   ytext!: Y.Array<any>;
@@ -27,100 +27,68 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private renderer: Renderer2
   ) {
-
     this.ydoc = new Y.Doc();
     this.ytext = this.ydoc.getArray('v-text');
-
     this.workspace = new Workspace({ id: 'foo', schema });
+    // const wsProvider = new WebsocketProvider('ws://localhost:1234', 'my-roomname', this.workspace.doc)
+    // wsProvider.on('status', (event: { status: any; }) => {
+    //   console.log(event.status) // logs "connected" or "disconnected"
+    // })
+  }
 
+  ngOnInit(): void {
+  }
+  
+  ngAfterViewInit(): void {
     let data = localStorage.getItem("test") || null;
-    if (data) {
-      const jsonObject = JSON.parse(data);
-      const numberArray = Object.keys(jsonObject).map(key => jsonObject[key]);
-      const binary = new Uint8Array(numberArray);
-      Y.applyUpdate(this.workspace.doc, binary);
-
-      this.page = this.workspace.getPage("test-id") || null
-      if (this.page) {
-        // this.createEditor(this.page);
-        console.log(this.page);
-      }
-    } else {
+    if (!data) {
       this.page = this.workspace.createPage({ id: 'test-id' });
-      console.log(this.page)
       if (this.page) {
         this.page?.waitForLoaded().then(() => {
           const pageBlockId = this.page?.addBlock('affine:page');
           const noteId = this.page?.addBlock('affine:note', {}, pageBlockId);
           this.page?.addBlock('affine:paragraph', { title: "hello world" }, noteId);
+          this.createEditor(this.page!);
         });
       }
-    }
-
-    const wsProvider = new WebsocketProvider('ws://localhost:1234', 'my-roomname', this.workspace.doc)
-    wsProvider.on('status', (event: { status: any; }) => {
-      console.log(event.status) // logs "connected" or "disconnected"
-    })
-  }
-
-  ngOnInit(): void {
-    if (this.page) {
-      console.log("create edtior")
-      this.editor = new EditorContainer();
-      this.editor.page = this.page;
+    } else {
+      const jsonObject = JSON.parse(data);
+      this.workspace.importPageSnapshot(jsonObject, "test-id")
+      this.page = this.workspace.getPage("test-id") || null;
+      if (this.page) {
+        this.page?.waitForLoaded().then(() => {
+          this.createEditor(this.page!);
+        })
+      }
     }
   }
 
-  ngAfterViewInit(): void {
-    if (this.editor && this.page && this.container) {
-      console.log("render editor");
-      this.renderer.appendChild(this.container.nativeElement, this.editor);
-      this.monitorChanges();
-    }
+  createEditor(page: Page): void {
+    console.log("manual create", this.page)
+    this.editor = new EditorContainer();
+    this.editor.page = page;
+    this.renderer.appendChild(this.container.nativeElement, this.editor);
+    this.monitorChanges();
   }
-
-  // createEditor(page: Page): void {
-  //   console.log("manual create")
-  //   this.editor = new EditorContainer();
-  //   this.editor.page = page;
-  //   console.log("render editor");
-  //   this.renderer.appendChild(this.container.nativeElement, this.editor);
-  //   this.monitorChanges();
-  // }
 
   monitorChanges(): void {
     this.workspace.doc.on('update', (updates: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
+      console.log("on update")
       if (tr.local) {
-        const update = Y.encodeStateAsUpdate(this.workspace.doc);
+        const update = Y.encodeStateAsUpdate(this.workspace.doc, updates);
         Y.applyUpdate(this.workspace.doc, update);
-        localStorage.setItem("test", JSON.stringify(Y.encodeStateAsUpdate(this.workspace.doc)));
+        const snap = this.workspace.exportPageSnapshot("test-id");
+        localStorage.setItem("test", JSON.stringify(snap))
+      } else {
+        console.log("not local")
       }
-    })
-
-    this.ydoc.on('update', (updates: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
-      console.log("ydoc update", this.page?.id)
-      // if (tr.local) {
-      console.log("ydoc updates here");
-
-      // const jsonString = JSON.stringify(Y.encodeStateAsUpdate(this.workspace.doc, updates));
-      // localStorage.setItem("test2", jsonString);
-      // }
     })
 
   }
 
   ngOnDestroy(): void {
-
     if (this.workspace.doc) {
       this.workspace.doc.destroy();
     }
   }
-
-  // handleClick(): void {
-  //   const update = Y.encodeStateAsUpdate(this.workspace.doc);
-  //   console.log(update);
-  //   Y.applyUpdate(this.workspace.doc, update);
-  //   localStorage.setItem("test", JSON.stringify(Y.encodeStateAsUpdate(this.workspace.doc)));
-  //   // console.log(Y.encodeStateAsUpdate(this.ydoc))
-  // }
 }
