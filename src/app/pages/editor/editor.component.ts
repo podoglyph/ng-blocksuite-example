@@ -30,15 +30,15 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ydoc = new Y.Doc();
     this.ytext = this.ydoc.getArray('v-text');
     this.workspace = new Workspace({ id: 'foo', schema });
-    // const wsProvider = new WebsocketProvider('ws://localhost:1234', 'my-roomname', this.workspace.doc)
-    // wsProvider.on('status', (event: { status: any; }) => {
-    //   console.log(event.status) // logs "connected" or "disconnected"
-    // })
+    const wsProvider = new WebsocketProvider('ws://localhost:1234', 'my-roomname', this.workspace.doc)
+    wsProvider.on('status', (event: { status: any; }) => {
+      console.log(event.status) // logs "connected" or "disconnected"
+    })
   }
 
   ngOnInit(): void {
   }
-  
+
   ngAfterViewInit(): void {
     let data = localStorage.getItem("test") || null;
     if (!data) {
@@ -72,17 +72,24 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   monitorChanges(): void {
-    this.workspace.doc.on('update', (updates: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
-      console.log("on update")
-      if (tr.local) {
-        const update = Y.encodeStateAsUpdate(this.workspace.doc, updates);
-        Y.applyUpdate(this.workspace.doc, update);
+    // this.workspace.doc.on('update', (updates: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
+    //   console.log("on update")
+    //   if (tr.local) {
+    //     const update = Y.encodeStateAsUpdate(this.workspace.doc, updates);
+    //     // Y.applyUpdate(this.workspace.doc, update);
+    //     const snap = this.workspace.exportPageSnapshot("test-id");
+    //     localStorage.setItem("test", JSON.stringify(snap))
+    //   } else {
+    //     console.log("not local")
+    //   }
+    // })
+
+    if (this.page) {
+      this.page.slots.yUpdated.on(() => {
         const snap = this.workspace.exportPageSnapshot("test-id");
         localStorage.setItem("test", JSON.stringify(snap))
-      } else {
-        console.log("not local")
-      }
-    })
+      })
+    }
 
   }
 
