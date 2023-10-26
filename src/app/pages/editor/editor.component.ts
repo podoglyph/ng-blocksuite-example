@@ -53,7 +53,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else {
       const jsonObject = JSON.parse(data);
-      this.workspace.importPageSnapshot(jsonObject, "test-id")
+      this.workspace.importPageSnapshot(jsonObject, "test-id");
       this.page = this.workspace.getPage("test-id") || null;
       if (this.page) {
         this.page?.waitForLoaded().then(() => {
@@ -64,7 +64,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   createEditor(page: Page): void {
-    console.log("manual create", page)
+    console.log("manual create", page);
     this.editor = new EditorContainer();
     this.editor.page = page;
     this.renderer.appendChild(this.container.nativeElement, this.editor);
@@ -72,25 +72,12 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   monitorChanges(): void {
-    // this.workspace.doc.on('update', (updates: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
-    //   console.log("on update")
-    //   if (tr.local) {
-    //     const update = Y.encodeStateAsUpdate(this.workspace.doc, updates);
-    //     // Y.applyUpdate(this.workspace.doc, update);
-    //     const snap = this.workspace.exportPageSnapshot("test-id");
-    //     localStorage.setItem("test", JSON.stringify(snap))
-    //   } else {
-    //     console.log("not local")
-    //   }
-    // })
-
     if (this.page) {
       this.page.slots.yUpdated.on(() => {
         const snap = this.workspace.exportPageSnapshot("test-id");
-        localStorage.setItem("test", JSON.stringify(snap))
+        localStorage.setItem("test", JSON.stringify(snap));
       })
     }
-
   }
 
   ngOnDestroy(): void {
