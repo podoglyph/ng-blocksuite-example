@@ -64,7 +64,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   createEditor(page: Page): void {
-    console.log("manual create", this.page)
+    console.log("manual create", page)
     this.editor = new EditorContainer();
     this.editor.page = page;
     this.renderer.appendChild(this.container.nativeElement, this.editor);
